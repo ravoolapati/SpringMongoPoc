@@ -1,6 +1,5 @@
 package com.cvs.poc.SpringMongoPoc.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
 import com.cvs.poc.SpringMongoPoc.model.Address;
 import com.cvs.poc.SpringMongoPoc.model.Email;
@@ -11,18 +10,18 @@ import com.cvs.poc.SpringMongoPoc.services.SequenceGeneratorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 @WebMvcTest(PersonController.class)
@@ -49,6 +48,62 @@ class PersonControllerTest {
                 .andReturn().getResponse().getContentAsString();
         List<Person> objects = objectMapper.readValue(response, List.class);
         Assertions.assertTrue(objects.size() == 1);
+    }
+
+    @Test
+    public void getPersonByIdTest() throws Exception {
+        Optional<Person> person =  Optional.of(getPerson());
+        Mockito.when(personRepository.findById(101l)).thenReturn(person);
+        String response = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/person/101"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        Person object = objectMapper.readValue(response, Person.class);
+        Assertions.assertEquals(101l, object.getId());
+    }
+
+    @Test
+    public void createPersonTest() throws Exception {
+        Person person =  getPerson();
+
+        String personJson = objectMapper.writeValueAsString(person);
+        Mockito.when(sequenceGeneratorService.generateSequence(Person.SEQUENCE_NAME)).thenReturn(101l);
+        Mockito.when(personRepository.save(Matchers.any(Person.class))).thenReturn(person);
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/api/person/").contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(personJson)).andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        Assertions.assertEquals(200, status);
+        String content = mvcResult.getResponse().getContentAsString();
+        System.out.print("content :"+personJson);
+        Assertions.assertEquals(personJson, content);
+    }
+
+    @Test
+    public void updatePersonTest() throws Exception {
+        Person person =  getPerson();
+        Mockito.when(personRepository.findById(101l)).thenReturn(Optional.of(person));
+        person.setGenderBio("F");
+        String personJson = objectMapper.writeValueAsString(person);
+        Mockito.when(personRepository.save(person)).thenReturn(person);
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.patch("/api/person/101").contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(personJson)).andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        Assertions.assertEquals(200, status);
+        String content = mvcResult.getResponse().getContentAsString();
+        Person object = objectMapper.readValue(content, Person.class);
+        Assertions.assertEquals("F",object.getGenderBio());
+    }
+
+    @Test
+    public void deletePersonTest() throws Exception {
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("deleted", Boolean.TRUE);
+        Person person =  getPerson();
+        Mockito.when(personRepository.findById(101l)).thenReturn(Optional.of(person));
+        String result = this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/person/101"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        Assertions.assertNotNull(result);
+
     }
 
     private Person getPerson(){
