@@ -1,0 +1,77 @@
+logging:
+  level:
+    org.springframework: INFO
+    org.springframework.web: INFO
+    org.apache.kafka: INFO
+    org.apache.http.wire: INFO
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: INFO
+
+springfox:
+  documentation:
+    swagger:
+      v2:
+        path: /api-docs
+server:
+  port: 9000
+spring:
+  data:
+    mongodb
+    uri:mongodb://localhost:27017/PersonDB
+  kafka:
+    properties:
+      bootstrap.servers: bootstrap.dev.kafka.shared-svc.local:9092
+      schema.registry.url: https://schemaregistry.lab.kafka.shared-svc.local
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username=ImthZmthX2Jyb2tlcl9pbnRlcm5hbCI= password=IkRldmVsb3BlckAxMjMi;
+      schema.registry.basic.auth.user.info: ImthZmthX2Jyb2tlcl9pbnRlcm5hbCI=:IkRldmVsb3BlckAxMjMi
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      basic.auth.credentials.source: USER_INFO
+      acks: all
+      auto.commit.offset: true
+      retries: 3
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  #jackson:
+  #  date-format: io.swagger.RFC3339DateFormat
+  #  serialization:
+  #    fail-on-empty-beans: false
+  #    WRITE_DATES_AS_TIMESTAMPS: false
+  #  default-property-inclusion: NON_NULL
+config:
+  api:
+    httpMethodsNotAllowed: TRACE,HEAD,OPTIONS
+services:
+  serviceToken:
+    app_name: identity-eph-change-event
+    tenant: cvs
+    userId: service-account
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, prometheus
+
+topics:
+  dlt: hc-dead-letter-common
+  add-delete-ssk: user-cvs-identity-ssk-integration
+  add-delete-person: user-cvs-identity-person-integration
+  person-merge-split: user-cvs-identity-person-sm-integration
+  source-merge-split: user-cvs-identity-source-sm-integration
+
+dlq:
+  enable: true
+  kafka:
+    bootstrapservers: bootstrap.test.kafka.shared-svc.local:9092
+    schemaregistryurl: https://schemaregistry.test.kafka.shared-svc.local
+    sasljaasconfig: org.apache.kafka.common.security.plain.PlainLoginModule required username=ImthZmthX2Jyb2tlcl9pbnRlcm5hbCI= password=IkRldmVsb3BlckAxMjMi;
+    schemaregistrybasicauthuserinfo: ImthZmthX2Jyb2tlcl9pbnRlcm5hbCI=:IkRldmVsb3BlckAxMjMi
+    securityprotocol: SASL_SSL
+    saslmechanism: PLAIN
+    basicauthcredentialssource: USER_INFO
+    acks: all
+    autocommitoffset: true
+    keyserializer: org.apache.kafka.common.serialization.StringSerializer
+    valueserializer: com.cvs.digital.dlq.common.messages.DLQMessageSerializer
+  retrycountheaderkey: "dlq-retry-count"

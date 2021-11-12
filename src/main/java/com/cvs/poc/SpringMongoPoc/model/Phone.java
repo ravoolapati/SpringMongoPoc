@@ -4,6 +4,7 @@ public class Phone {
     private String countryCode;
     private String number;
     private String category;
+
     private String mobile;
 
     public Phone(String countryCode, String number, String category, String mobile) {
@@ -25,7 +26,18 @@ public class Phone {
         return category;
     }
 
+    @Override
+    public String toString() {
+        return "Phone{" +
+                "countryCode='" + countryCode + '\'' +
+                ", number='" + number + '\'' +
+                ", category='" + category + '\'' +
+                ", mobile='" + mobile + '\'' +
+                '}';
+    }
+
     public String getMobile() {
         return mobile;
     }
+
 }

@@ -105,4 +105,19 @@ public class Person {
     public void setId(long id) {
         this.id = id;
     }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", genderBio='" + genderBio + '\'' +
+                ", birthdate='" + birthdate + '\'' +
+                ", preferedModeOfContact='" + preferedModeOfContact + '\'' +
+                ", addresses=" + addresses +
+                ", phones=" + phones +
+                ", emails=" + emails +
+                '}';
+    }
 }

@@ -34,4 +34,15 @@ public class Address {
     public String getCountry() {
         return country;
     }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "streetAddress='" + streetAddress + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zip='" + zip + '\'' +
+                ", country='" + country + '\'' +
+                '}';
+    }
 }
